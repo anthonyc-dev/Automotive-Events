@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      UserRole @default(ORGANIZER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  events    Event[]
+  
+  @@map("users")
+}
+
+model Event {
+  id               String      @id @default(cuid())
+  title            String
+  description      String
+  shortDescription String?
+  startDate        DateTime
+  endDate          DateTime?
+  location         String
+  address          String?
+  latitude         Float?
+  longitude        Float?
+  imageUrl         String?
+  images           String[]    @default([])
+  ticketPrice      Float?
+  ticketUrl        String?
+  websiteUrl       String?
+  contactEmail     String?
+  contactPhone     String?
+  category         EventCategory @default(EXHIBITION)
+  status           EventStatus @default(PENDING)
+  featured         Boolean     @default(false)
+  maxAttendees     Int?
+  currentAttendees Int         @default(0)
+  tags             String[]    @default([])
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  publishedAt      DateTime?
+
+  // Relations
+  organizer        User        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  organizerId      String
+  
+  @@map("events")
+}
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  
+  @@map("newsletter")
+}
+
+enum UserRole {
+  ADMIN
+  ORGANIZER
+}
+
+enum EventCategory {
+  RALLY
+  EXHIBITION
+  SHOW
+  RACE
+  TRACK_DAY
+  MEET_UP
+  CONFERENCE
+  OTHER
+}
+
+enum EventStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PUBLISHED
+  CANCELLED
+}
