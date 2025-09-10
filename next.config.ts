@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["bcryptjs"],
   },
+  images: {
+    domains: ["images.unsplash.com"],
+  },
   typescript: {
     ignoreBuildErrors: false,
   },

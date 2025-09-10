@@ -50,7 +50,7 @@ export function EventsFilter() {
   };
 
   return (
-    <div className="bg-background border rounded-lg p-6 shadow-sm">
+    <div className="bg-background  rounded-lg p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Filters</h3>
         {(selectedCategories.length > 0 || selectedPriceRanges.length > 0) && (

@@ -78,7 +78,7 @@ export function EventsTable() {
 
   if (mockEvents.length === 0) {
     return (
-      <div className="bg-background border rounded-lg p-12 text-center">
+      <div className="bg-background border border-border/20 rounded-lg p-12 text-center">
         <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-semibold mb-2">No events yet</h3>
         <p className="text-muted-foreground mb-6">
@@ -96,7 +96,7 @@ export function EventsTable() {
   }
 
   return (
-    <div className="bg-background border rounded-lg overflow-hidden">
+    <div className="bg-background  rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-muted/50">

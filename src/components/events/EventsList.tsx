@@ -2,15 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  Calendar,
-  MapPin,
-  Clock,
-  Users,
-  Grid,
-  List,
-  ArrowRight,
-} from "lucide-react";
+import Image from "next/image";
+import { Calendar, MapPin, Users, Grid, List, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDateTime } from "@/lib/utils";
 
@@ -40,7 +33,7 @@ const mockEvents = [
     endDate: new Date("2024-12-20T17:00:00"),
     location: "London, UK",
     imageUrl:
-      "https://images.unsplash.com/photo-1544829099-b9a0c5303bea?q=80&w=2069&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1632239505939-a21dfe8fb6b7?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     category: "EXHIBITION",
     ticketPrice: 25,
     maxAttendees: 1000,
@@ -181,7 +174,7 @@ export function EventsList({ filter }: EventsListProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: index * 0.1 }}
-            className={`bg-background border rounded-lg overflow-hidden shadow-sm card-hover ${
+            className={`bg-background border border-border/50 rounded-lg overflow-hidden shadow-sm card-hover ${
               viewMode === "list" ? "flex" : ""
             }`}
           >
@@ -190,10 +183,12 @@ export function EventsList({ filter }: EventsListProps) {
                 viewMode === "list" ? "w-48 flex-shrink-0" : "h-48"
               }`}
             >
-              <img
+              <Image
                 src={event.imageUrl}
                 alt={event.title}
-                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-300 hover:scale-105"
               />
               <div className="absolute top-4 left-4">
                 <span

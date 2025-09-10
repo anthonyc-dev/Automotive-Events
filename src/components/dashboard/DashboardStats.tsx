@@ -50,7 +50,7 @@ export function DashboardStats() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="bg-background border rounded-lg p-6 hover:shadow-md transition-shadow"
+            className="bg-background border border-border/50 rounded-lg p-6 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
               <div>

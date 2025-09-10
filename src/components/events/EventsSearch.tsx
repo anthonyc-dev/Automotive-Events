@@ -15,7 +15,7 @@ export function EventsSearch() {
   };
 
   return (
-    <div className="bg-background border rounded-lg p-6 shadow-sm">
+    <div className="bg-background border border-border/20 rounded-lg p-6 shadow-sm">
       <form
         onSubmit={handleSearch}
         className="grid grid-cols-1 md:grid-cols-4 gap-4"

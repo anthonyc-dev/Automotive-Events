@@ -1,128 +1,153 @@
+"use client";
 import Link from "next/link";
-import { Calendar, Mail, Phone, MapPin } from "lucide-react";
+import { motion, Variants } from "framer-motion";
+import { Calendar, Mail, Globe } from "lucide-react";
 
 export function Footer() {
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number], // ✅ cubic-bezier with correct typing
+      },
+    },
+  };
+
   return (
-    <footer className="border-t bg-secondary/50">
-      <div className="container px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="relative border-t border-border/20 bg-gradient-to-br from-secondary/50 via-secondary/30 to-background overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-accent/5 rounded-full blur-3xl" />
+      </div>
+
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
+
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        className="relative z-10 container px-4 py-12"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
           {/* Logo and Description */}
-          <div className="space-y-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Calendar className="h-5 w-5" />
+          <motion.div variants={itemVariants} className="space-y-4">
+            <Link href="/" className="group flex items-center space-x-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Calendar className="h-4 w-4" />
               </div>
-              <span className="text-xl font-bold">AutoEvents</span>
+              <span className="text-lg font-semibold text-primary">
+                AutoEvents
+              </span>
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               The premier platform for discovering and managing automotive
-              events. Connect with car enthusiasts and never miss an event
-              again.
+              events worldwide.
             </p>
-          </div>
+          </motion.div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Quick Links</h3>
+          <motion.div variants={itemVariants} className="space-y-4">
+            <h3 className="text-sm font-medium text-primary">Platform</h3>
             <div className="space-y-2">
-              <Link
-                href="/events"
-                className="block text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                Browse Events
-              </Link>
-              <Link
-                href="/events/today"
-                className="block text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                Events Today
-              </Link>
-              <Link
-                href="/dashboard"
-                className="block text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                Add Event
-              </Link>
-              <Link
-                href="/about"
-                className="block text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                About Us
-              </Link>
+              {[
+                { href: "/events", label: "Browse Events" },
+                { href: "/events/today", label: "Events Today" },
+                { href: "/dashboard", label: "Add Event" },
+                { href: "/about", label: "About" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Support */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Support</h3>
+          <motion.div variants={itemVariants} className="space-y-4">
+            <h3 className="text-sm font-medium text-primary">Support</h3>
             <div className="space-y-2">
+              {[
+                { href: "/faq", label: "FAQ" },
+                { href: "/privacy", label: "Privacy" },
+                { href: "/terms", label: "Terms" },
+                { href: "/contact", label: "Contact" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Contact */}
+          <motion.div variants={itemVariants} className="space-y-4">
+            <h3 className="text-sm font-medium text-primary">Contact</h3>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  hello@autoevents.com
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Worldwide</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Bottom Section */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-12 pt-6 border-t border-border/20"
+        >
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              © 2024 AutoEvents. All rights reserved.
+            </p>
+            <div className="flex items-center gap-6">
               <Link
-                href="/faq"
-                className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                href="/terms"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                FAQ
+                Terms
               </Link>
               <Link
                 href="/privacy"
-                className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Privacy Policy
-              </Link>
-              <Link
-                href="/cookies"
-                className="block text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                Cookie Policy
-              </Link>
-              <Link
-                href="/contact"
-                className="block text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                Contact
+                Privacy
               </Link>
             </div>
           </div>
-
-          {/* Contact Info */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Contact</h3>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span>info@autoevents.com</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>Worldwide</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 border-t pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            © 2024 AutoEvents. All rights reserved.
-          </p>
-          <div className="mt-4 md:mt-0 flex space-x-4">
-            <Link
-              href="/terms"
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              href="/privacy"
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              Privacy
-            </Link>
-          </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </footer>
   );
 }

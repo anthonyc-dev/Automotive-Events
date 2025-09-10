@@ -1,23 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import {
-  ArrowLeft,
-  Calendar,
-  MapPin,
-  Users,
-  DollarSign,
-  Image,
-  Tag,
-} from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function NewEventPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -38,18 +30,21 @@ export default function NewEventPage() {
   });
 
   // Redirect if not authenticated
-  if (status === "unauthenticated") {
-    router.push("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
 
-  if (status === "loading") {
+  if (status === "loading" || status === "unauthenticated") {
     return (
       <div className="container px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading...</p>
+            <p className="text-muted-foreground">
+              {status === "loading" ? "Loading..." : "Redirecting..."}
+            </p>
           </div>
         </div>
       </div>
@@ -112,7 +107,7 @@ export default function NewEventPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
-          <div className="bg-background border rounded-lg p-6">
+          <div className="bg-background border border-border/50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Calendar className="h-5 w-5 mr-2" />
               Basic Information
@@ -224,7 +219,7 @@ export default function NewEventPage() {
           </div>
 
           {/* Date & Time */}
-          <div className="bg-background border rounded-lg p-6">
+          <div className="bg-background border border-border/50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Calendar className="h-5 w-5 mr-2" />
               Date & Time
@@ -269,7 +264,7 @@ export default function NewEventPage() {
           </div>
 
           {/* Location */}
-          <div className="bg-background border rounded-lg p-6">
+          <div className="bg-background border border-border/50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <MapPin className="h-5 w-5 mr-2" />
               Location
@@ -316,7 +311,7 @@ export default function NewEventPage() {
           </div>
 
           {/* Pricing & Capacity */}
-          <div className="bg-background border rounded-lg p-6">
+          <div className="bg-background border border-border/50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Users className="h-5 w-5 mr-2" />
               Pricing & Capacity
@@ -383,7 +378,7 @@ export default function NewEventPage() {
           </div>
 
           {/* Contact Information */}
-          <div className="bg-background border rounded-lg p-6">
+          <div className="bg-background border border-border/50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
