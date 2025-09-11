@@ -41,8 +41,13 @@ const mockEvents = [
   },
 ];
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const event = mockEvents.find((e) => e.id === params.id);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const event = mockEvents.find((e) => e.id === id);
 
   if (!event) {
     return {
@@ -61,8 +66,13 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default function EventPage({ params }: { params: { id: string } }) {
-  const event = mockEvents.find((e) => e.id === params.id);
+export default async function EventPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const event = mockEvents.find((e) => e.id === id);
 
   if (!event) {
     notFound();

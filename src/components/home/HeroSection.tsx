@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Calendar, Search, Zap, Star } from "lucide-react";
+import { Zap, Star } from "lucide-react";
 
 export function HeroSection() {
   return (
@@ -45,14 +45,14 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm font-medium mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm font-medium mb-5"
           >
             <Zap className="h-4 w-4 text-accent" />
             <span>The Ultimate Automotive Event Platform</span>
             <Star className="h-4 w-4 text-accent fill-accent" />
           </motion.div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
+          <h1 className="text-5xl md:text-7xl lg:text-7xl font-bold mb-5 leading-tight">
             <motion.span
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -83,7 +83,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
-            className="text-xl md:text-2xl mb-12 text-gray-200 max-w-3xl mx-auto leading-relaxed"
+            className="text-xl md:text-md mb-5 text-gray-200 max-w-3xl mx-auto leading-relaxed font-light"
           >
             Connect with car enthusiasts, discover exciting rallies,
             exhibitions, and races. Join the largest automotive community and
@@ -94,26 +94,26 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.2 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-5"
           >
             <Link
               href="/events"
-              className="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-white bg-gradient-to-r from-primary to-red-600 rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-primary/25 hover:-translate-y-1 min-w-[200px]"
+              className="group relative inline-flex items-center justify-center px-8 py-4 text-md text-white bg-gradient-to-r from-primary to-red-600 rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-primary/25 hover:-translate-y-1 min-w-[200px]"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-red-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity" />
+              {/* <div className="absolute inset-0 bg-gradient-to-r from-primary to-red-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity" /> */}
               <div className="relative flex items-center">
-                <Search className="mr-3 h-6 w-6" />
+                {/* <Search className="mr-3 h-6 w-6" /> */}
                 Browse Events
               </div>
             </Link>
 
             <Link
               href="/dashboard"
-              className="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-gray-900 bg-gradient-to-r from-accent to-yellow-400 rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-accent/25 hover:-translate-y-1 min-w-[200px]"
+              className="group relative inline-flex items-center justify-center px-8 py-4 text-md  text-yellow-400 border border-yellow-400 rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-accent/25 hover:-translate-y-1 min-w-[200px]"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-accent to-yellow-400 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity" />
+              {/* <div className="absolute inset-0 bg-gradient-to-r from-accent to-yellow-400 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity" /> */}
               <div className="relative flex items-center">
-                <Calendar className="mr-3 h-6 w-6" />
+                {/* <Calendar className="mr-3 h-6 w-6" /> */}
                 Add Your Event
               </div>
             </Link>
@@ -187,7 +187,6 @@ export function HeroSection() {
               className="w-1.5 h-4 bg-gradient-to-b from-accent to-transparent rounded-full mt-3"
             />
           </div>
-          <div className="absolute -inset-2 bg-white/10 rounded-full blur-sm -z-10" />
         </motion.div>
       </motion.div>
 

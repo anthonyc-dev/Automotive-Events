@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar, Download } from "lucide-react";
+import { useState } from "react";
 
 interface Event {
   title: string;
@@ -16,6 +17,8 @@ interface CalendarAddProps {
 }
 
 export function CalendarAdd({ event }: CalendarAddProps) {
+  const [downloading, setDownloading] = useState(false);
+
   const formatDateForCalendar = (date: Date) => {
     return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
   };
@@ -39,7 +42,8 @@ export function CalendarAdd({ event }: CalendarAddProps) {
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
 
-  const generateICSFile = () => {
+  const generateICSFile = async () => {
+    setDownloading(true);
     const startDate =
       event.startDate.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
     const endDate = event.endDate
@@ -75,30 +79,37 @@ export function CalendarAdd({ event }: CalendarAddProps) {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    setTimeout(() => setDownloading(false), 800);
   };
 
   return (
-    <div className="flex items-center space-x-2">
-      <span className="text-sm font-medium text-muted-foreground flex items-center">
-        <Calendar className="h-4 w-4 mr-1" />
-        Add to Calendar:
+    <div className="flex flex-wrap items-center gap-3 bg-muted/40 border border-border/60 rounded-xl px-4 py-3 shadow-sm">
+      <span className="text-sm font-semibold text-muted-foreground flex items-center mr-2">
+        <Calendar className="h-4 w-4 mr-1 text-primary" />
+        Add to Calendar
       </span>
 
       <a
         href={generateGoogleCalendarUrl()}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors"
+        className="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        title="Add to Google Calendar"
       >
+        <Calendar className="h-4 w-4 mr-2" />
         Google Calendar
       </a>
 
       <button
         onClick={generateICSFile}
-        className="inline-flex items-center px-3 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-md transition-colors"
+        disabled={downloading}
+        className={`inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg transition-colors shadow-sm border border-border/40 bg-muted text-foreground hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-primary/30 ${
+          downloading ? "opacity-60 cursor-not-allowed" : ""
+        }`}
+        title="Download .ics file"
       >
-        <Download className="h-4 w-4 mr-1" />
-        Download .ics
+        <Download className="h-4 w-4 mr-2" />
+        {downloading ? "Downloading..." : "Download .ics"}
       </button>
     </div>
   );

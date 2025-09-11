@@ -24,7 +24,7 @@ export function NewsletterSection() {
   };
 
   return (
-    <section className="py-16 bg-primary/5">
+    <section className="py-16 bg-primary/5 ">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

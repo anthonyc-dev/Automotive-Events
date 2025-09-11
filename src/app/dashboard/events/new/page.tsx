@@ -11,6 +11,7 @@ export default function NewEventPage() {
   const router = useRouter();
   const { status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -54,18 +55,58 @@ export default function NewEventPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
-      // In a real app, this would submit to your API
-      console.log("Creating event:", formData);
+      // Format form data for API
+      const apiData = {
+        title: formData.title,
+        description: formData.description,
+        shortDescription: formData.shortDescription || undefined,
+        startDate: formData.startDate,
+        endDate: formData.endDate || undefined,
+        location: formData.location,
+        address: formData.address || undefined,
+        category: formData.category,
+        ticketPrice: formData.ticketPrice
+          ? parseFloat(formData.ticketPrice)
+          : undefined,
+        maxAttendees: formData.maxAttendees
+          ? parseInt(formData.maxAttendees)
+          : undefined,
+        contactEmail: formData.contactEmail || undefined,
+        contactPhone: formData.contactPhone || undefined,
+        websiteUrl: formData.websiteUrl || undefined,
+        ticketUrl: formData.ticketUrl || undefined,
+        tags: formData.tags
+          ? formData.tags
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter((tag) => tag)
+          : undefined,
+      };
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/postEvent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiData),
+      });
 
-      // Redirect to dashboard
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to create event");
+      }
+
+      // Success - redirect to dashboard
       router.push("/dashboard");
     } catch (error) {
       console.error("Error creating event:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to create event"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +144,14 @@ export default function NewEventPage() {
             Fill out the details below to create your automotive event.
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <p className="font-medium">Error creating event:</p>
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-8">

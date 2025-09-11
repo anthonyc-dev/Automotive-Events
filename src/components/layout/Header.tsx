@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -23,8 +23,18 @@ import { cn } from "@/lib/utils";
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 8);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navigation = [
     { name: "Events Today", href: "/events/today", icon: Calendar },
@@ -38,7 +48,12 @@ export function Header() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm"
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-300 lg",
+        scrolled
+          ? "border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm"
+          : "bg-none border-none shadow-none"
+      )}
     >
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Enhanced Logo */}
@@ -63,7 +78,7 @@ export function Header() {
         <div className="hidden md:flex items-center space-x-8">
           <nav className="flex items-center space-x-1">
             {navigation.map((item) => {
-              const Icon = item.icon;
+              // const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -76,12 +91,12 @@ export function Header() {
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Icon
+                  {/* <Icon
                     className={cn(
                       "h-4 w-4 transition-all duration-300",
                       isActive ? "text-primary" : "group-hover:text-primary"
                     )}
-                  />
+                  /> */}
                   <span>{item.name}</span>
                   {isActive && (
                     <motion.div
@@ -187,7 +202,7 @@ export function Header() {
                   href="/register"
                   className="group relative inline-flex items-center justify-center px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-primary to-red-600 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-0.5"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-red-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity" />
+                  {/* <div className="absolute inset-0 bg-gradient-to-r from-primary to-red-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity" /> */}
                   <div className="relative flex items-center space-x-2">
                     <Zap className="h-4 w-4" />
                     <span>Get Started</span>

@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import {
   Calendar,
   MapPin,
-  Clock,
   Users,
   Mail,
   Phone,
@@ -15,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import Image from "next/image";
 
 interface Event {
   id: string;
@@ -88,11 +88,13 @@ export function EventDetails({ event }: EventDetailsProps) {
       className="max-w-4xl mx-auto"
     >
       {/* Image Gallery */}
-      <div className="relative h-96 rounded-lg overflow-hidden mb-8">
-        <img
+      <div className="relative h-96 rounded-lg overflow-hidden ">
+        <Image
           src={event.images[currentImageIndex]}
           alt={event.title}
           className="w-full h-full object-cover"
+          width={1200}
+          height={384}
         />
 
         {event.images.length > 1 && (
@@ -251,7 +253,7 @@ export function EventDetails({ event }: EventDetailsProps) {
       {/* Additional Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Contact Info */}
-        <div className="bg-background border rounded-lg p-6">
+        <div className="bg-background border border-border/50 rounded-lg p-6">
           <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
           <div className="space-y-3">
             <div>
@@ -288,7 +290,7 @@ export function EventDetails({ event }: EventDetailsProps) {
         </div>
 
         {/* Tags */}
-        <div className="bg-background border rounded-lg p-6">
+        <div className="bg-background border border-border/50 rounded-lg p-6">
           <h3 className="text-xl font-semibold mb-4">Tags</h3>
           <div className="flex flex-wrap gap-2">
             {event.tags.map((tag) => (
@@ -306,7 +308,7 @@ export function EventDetails({ event }: EventDetailsProps) {
 
       {/* Map placeholder */}
       {event.latitude && event.longitude && (
-        <div className="mt-8 bg-background border rounded-lg p-6">
+        <div className="mt-8 bg-background border border-border/50 rounded-lg p-6">
           <h3 className="text-xl font-semibold mb-4">Location</h3>
           <div className="bg-muted/50 rounded-lg h-64 flex items-center justify-center">
             <div className="text-center">
