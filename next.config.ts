@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ["bcryptjs"],
-  },
+  serverExternalPackages: ["bcryptjs"],
   images: {
     domains: ["images.unsplash.com"],
   },

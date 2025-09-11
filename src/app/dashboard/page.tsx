@@ -57,9 +57,9 @@ export default function DashboardPage() {
               ease.
             </p>
           </div>
-          <div className="flex-shrink-0">
+          {/* <div className="flex-shrink-0">
             <AddEventButton className="shadow-lg hover:scale-105 transition-transform" />
-          </div>
+          </div> */}
         </div>
 
         <div className="mb-12">

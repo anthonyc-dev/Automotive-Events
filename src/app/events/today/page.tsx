@@ -16,11 +16,12 @@ export default function EventsTodayPage() {
           <h1 className="text-4xl font-bold">Events Today</h1>
         </div>
         <p className="text-muted-foreground text-lg">
-          Don't miss out! Here are all the automotive events happening today.
+          Don&apos;t miss out! Here are all the automotive events happening
+          today.
         </p>
       </div>
 
-      <Suspense fallback={<div>Loading today's events...</div>}>
+      <Suspense fallback={<div>Loading today&apos;s events...</div>}>
         <EventsList filter="today" />
       </Suspense>
     </div>

@@ -6,29 +6,40 @@ import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, MapPin, Users } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+
+// Helper: convert file to base64 string
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") resolve(reader.result);
+      else reject("Failed to read file");
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 export default function NewEventPage() {
   const router = useRouter();
   const { status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // form data (text fields + optional image URLs)
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    shortDescription: "",
-    startDate: "",
-    endDate: "",
+    date: "",
+    images: "", // for URLs (comma separated)
     location: "",
-    address: "",
-    category: "EXHIBITION",
-    ticketPrice: "",
-    maxAttendees: "",
-    contactEmail: "",
-    contactPhone: "",
-    websiteUrl: "",
-    ticketUrl: "",
-    tags: "",
+    price: "",
   });
+
+  // image handling
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -52,66 +63,7 @@ export default function NewEventPage() {
     );
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Format form data for API
-      const apiData = {
-        title: formData.title,
-        description: formData.description,
-        shortDescription: formData.shortDescription || undefined,
-        startDate: formData.startDate,
-        endDate: formData.endDate || undefined,
-        location: formData.location,
-        address: formData.address || undefined,
-        category: formData.category,
-        ticketPrice: formData.ticketPrice
-          ? parseFloat(formData.ticketPrice)
-          : undefined,
-        maxAttendees: formData.maxAttendees
-          ? parseInt(formData.maxAttendees)
-          : undefined,
-        contactEmail: formData.contactEmail || undefined,
-        contactPhone: formData.contactPhone || undefined,
-        websiteUrl: formData.websiteUrl || undefined,
-        ticketUrl: formData.ticketUrl || undefined,
-        tags: formData.tags
-          ? formData.tags
-              .split(",")
-              .map((tag) => tag.trim())
-              .filter((tag) => tag)
-          : undefined,
-      };
-
-      const response = await fetch("/api/postEvent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(apiData),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to create event");
-      }
-
-      // Success - redirect to dashboard
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("Error creating event:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to create event"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // handle text input changes
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -121,6 +73,87 @@ export default function NewEventPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  // handle file selection
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files);
+
+    setImageFiles(files);
+    setImagePreviews(files.map((file) => URL.createObjectURL(file)));
+  };
+
+  // submit form
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      setUploadingImages(true);
+
+      // Prepare images array: combine uploaded files (as base64) and URLs
+      let images: string[] = [];
+
+      // 1. Add image URLs (if any)
+      if (formData.images.trim()) {
+        // Split by comma, trim, filter out empty
+        images = formData.images
+          .split(",")
+          .map((url) => url.trim())
+          .filter((url) => url.length > 0);
+      }
+
+      // 2. Add uploaded files (as base64)
+      if (imageFiles.length > 0) {
+        const base64Images = await Promise.all(
+          imageFiles.map((file) => fileToBase64(file))
+        );
+        images = images.concat(base64Images);
+      }
+
+      // Prepare payload for JSON API
+      const payload: {
+        title: string;
+        description: string;
+        images?: string[];
+        date: string;
+        location: string;
+        price?: number;
+      } = {
+        title: formData.title,
+        description: formData.description,
+        date: formData.date,
+        images: images.length > 0 ? images : undefined,
+        location: formData.location,
+        price: formData.price ? Number(formData.price) : undefined,
+      };
+
+      const response = await fetch("/api/postEvent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to create event");
+      }
+
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Error creating event:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to create event"
+      );
+    } finally {
+      setIsLoading(false);
+      setUploadingImages(false);
+    }
   };
 
   return (
@@ -184,30 +217,10 @@ export default function NewEventPage() {
 
               <div className="md:col-span-2">
                 <label
-                  htmlFor="shortDescription"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Short Description *
-                </label>
-                <input
-                  type="text"
-                  id="shortDescription"
-                  name="shortDescription"
-                  required
-                  value={formData.shortDescription}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Brief description (max 100 characters)"
-                  maxLength={100}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label
                   htmlFor="description"
                   className="block text-sm font-medium mb-2"
                 >
-                  Full Description *
+                  Description *
                 </label>
                 <textarea
                   id="description"
@@ -220,49 +233,61 @@ export default function NewEventPage() {
                   placeholder="Detailed event description"
                 />
               </div>
+            </div>
 
+            {/* Images */}
+            <div className="grid grid-cols-1 gap-6 mt-6">
               <div>
                 <label
-                  htmlFor="category"
+                  htmlFor="images"
                   className="block text-sm font-medium mb-2"
                 >
-                  Category *
-                </label>
-                <select
-                  id="category"
-                  name="category"
-                  required
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="RALLY">Rally</option>
-                  <option value="EXHIBITION">Exhibition</option>
-                  <option value="SHOW">Show</option>
-                  <option value="RACE">Race</option>
-                  <option value="TRACK_DAY">Track Day</option>
-                  <option value="MEET_UP">Meet Up</option>
-                  <option value="CONFERENCE">Conference</option>
-                  <option value="OTHER">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="tags"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Tags
+                  Upload Images (optional)
                 </label>
                 <input
-                  type="text"
-                  id="tags"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Comma-separated tags (e.g., motorsport, rally, championship)"
+                  type="file"
+                  id="images"
+                  name="images"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
+                  className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  You can select multiple images or paste image URLs below
+                  (comma separated).
+                </p>
+                <input
+                  type="text"
+                  id="images-url"
+                  name="images"
+                  value={formData.images}
+                  onChange={handleChange}
+                  className="w-full mt-2 px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Paste image URLs, separated by commas"
+                  disabled={imageFiles.length > 0}
+                />
+
+                {/* Preview selected images */}
+                {imagePreviews.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {imagePreviews.map((src, idx) => (
+                      <Image
+                        key={idx}
+                        src={src}
+                        alt={`Preview ${idx + 1}`}
+                        className="h-20 w-20 object-cover rounded border"
+                        width={80}
+                        height={80}
+                      />
+                    ))}
+                  </div>
+                )}
+                {uploadingImages && (
+                  <div className="text-xs text-muted-foreground mt-2">
+                    Uploading images...
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -273,42 +298,19 @@ export default function NewEventPage() {
               <Calendar className="h-5 w-5 mr-2" />
               Date & Time
             </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="startDate"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Start Date & Time *
-                </label>
-                <input
-                  type="datetime-local"
-                  id="startDate"
-                  name="startDate"
-                  required
-                  value={formData.startDate}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="endDate"
-                  className="block text-sm font-medium mb-2"
-                >
-                  End Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  id="endDate"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+            <div>
+              <label htmlFor="date" className="block text-sm font-medium mb-2">
+                Date & Time *
+              </label>
+              <input
+                type="datetime-local"
+                id="date"
+                name="date"
+                required
+                value={formData.date}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
             </div>
           </div>
 
@@ -318,176 +320,51 @@ export default function NewEventPage() {
               <MapPin className="h-5 w-5 mr-2" />
               Location
             </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="location"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Location *
-                </label>
-                <input
-                  type="text"
-                  id="location"
-                  name="location"
-                  required
-                  value={formData.location}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="City, Country"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="address"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Venue Address
-                </label>
-                <input
-                  type="text"
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Full address"
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="location"
+                className="block text-sm font-medium mb-2"
+              >
+                Location *
+              </label>
+              <input
+                type="text"
+                id="location"
+                name="location"
+                required
+                value={formData.location}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="City, Country"
+              />
             </div>
           </div>
 
-          {/* Pricing & Capacity */}
+          {/* Pricing */}
           <div className="bg-background border border-border/50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Users className="h-5 w-5 mr-2" />
               Pricing & Capacity
             </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label
-                  htmlFor="ticketPrice"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Ticket Price (USD)
-                </label>
-                <input
-                  type="number"
-                  id="ticketPrice"
-                  name="ticketPrice"
-                  min="0"
-                  step="0.01"
-                  value={formData.ticketPrice}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="0.00 (leave empty for free)"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="maxAttendees"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Max Attendees
-                </label>
-                <input
-                  type="number"
-                  id="maxAttendees"
-                  name="maxAttendees"
-                  min="1"
-                  value={formData.maxAttendees}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Maximum capacity"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="ticketUrl"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Ticket URL
-                </label>
-                <input
-                  type="url"
-                  id="ticketUrl"
-                  name="ticketUrl"
-                  value={formData.ticketUrl}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="https://..."
-                />
-              </div>
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium mb-2">
+                Ticket Price (USD)
+              </label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                min="0"
+                step="0.01"
+                value={formData.price}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="0.00 (leave empty for free)"
+              />
             </div>
           </div>
 
-          {/* Contact Information */}
-          <div className="bg-background border border-border/50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label
-                  htmlFor="contactEmail"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Contact Email
-                </label>
-                <input
-                  type="email"
-                  id="contactEmail"
-                  name="contactEmail"
-                  value={formData.contactEmail}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="contact@example.com"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="contactPhone"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Contact Phone
-                </label>
-                <input
-                  type="tel"
-                  id="contactPhone"
-                  name="contactPhone"
-                  value={formData.contactPhone}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="+1 234 567 8900"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="websiteUrl"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Event Website
-                </label>
-                <input
-                  type="url"
-                  id="websiteUrl"
-                  name="websiteUrl"
-                  value={formData.websiteUrl}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Submit Buttons */}
+          {/* Submit */}
           <div className="flex flex-col sm:flex-row gap-4 justify-end">
             <Link
               href="/dashboard"

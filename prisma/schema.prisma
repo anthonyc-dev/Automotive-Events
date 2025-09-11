@@ -30,30 +30,12 @@ model Event {
   id               String      @id @default(cuid())
   title            String
   description      String
-  shortDescription String?
-  startDate        DateTime
-  endDate          DateTime?
-  location         String
-  address          String?
-  latitude         Float?
-  longitude        Float?
-  imageUrl         String?
+  date             DateTime
   images           String[]    @default([])
-  ticketPrice      Float?
-  ticketUrl        String?
-  websiteUrl       String?
-  contactEmail     String?
-  contactPhone     String?
-  category         EventCategory @default(EXHIBITION)
-  status           EventStatus @default(PENDING)
-  featured         Boolean     @default(false)
-  maxAttendees     Int?
-  currentAttendees Int         @default(0)
-  tags             String[]    @default([])
+  location         String
+  price            Float?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
-  publishedAt      DateTime?
-
   // Relations
   organizer        User        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   organizerId      String
